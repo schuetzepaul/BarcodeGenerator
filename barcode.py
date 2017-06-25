@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 import sys
 
@@ -36,7 +36,11 @@ def char2Value(char):
             return int(translator[i][0])
     print "Could not find " + str(char) + " in the table"
 
-
+def value2Code(val):
+    
+    code = str(input("Enter checksum pattern for checksum " + str(val) + ": "))
+    return code
+    
 def string2Code(string):
     
     arr = []
@@ -51,19 +55,29 @@ def code2Plot(code):
     length = codeNP.sum()
     print "Length of code is " + str(length)
     
-    dataPlot = np.zeros((length,20))
+    dataPlot = np.zeros((20,length))
     j = 0
     black = True
     for el in code:
         for k in range(0,el):
             if black:
-                dataPlot[j+k] = 1
+                #print j+k
+                dataPlot[...,j+k] = 1
+
+        if black:
+            black=False
+        else:
+            black=True
         j += el
     
-    pl = plt.imshow(dataPlot)
-        
+    pl = plt.imshow(dataPlot,cmap="Greys", vmax=2)
+    plt.show()
+#    raw_input("Enter")
             
-    
+def codeLen(code):
+    codeNP = np.asarray(code)
+    length = codeNP.sum()
+    return length
 
 dataChars = sys.argv[1]
 
@@ -76,11 +90,25 @@ totalCode = []
 totalCode.extend(startCode)
 
 sumVal = 104
-for el in dataChars:
+for i,el in enumerate(dataChars):
     code = char2Code(el)
     totalCode.extend(code)
-    sumVal += char2Value(el)
+    sumVal += char2Value(el)*(i+1)
 
+checkSum=sumVal%103
+
+totalCode.extend(string2Code(value2Code(checkSum)))
+
+stopStr = "2331112"
+stopCode = string2Code(stopStr)
+
+totalCode.extend(stopCode)
 print totalCode
+
+if len(sys.argv)==3:
+    wallSize = float(sys.argv[2])
+
+    moduleSize = wallSize/codeLen(totalCode)
+    print "Module Size: " + str(moduleSize)
 
 code2Plot(totalCode)
